@@ -1,6 +1,6 @@
 const express = require('express');
 const http = require('http');
-const os = require('os');
+const os = require('os');  // 加入這行，引用 os 模組
 const { Server } = require('socket.io');
 
 // 建立 Express 應用程式與 HTTP 伺服器
@@ -19,15 +19,13 @@ io.on('connection', (socket) => {
         const { eventName, message } = data;
         console.log(`收到來自 host 的訊息 - 事件名稱: ${eventName}，內容: ${message}`);
 
-        // 廣播給所有客戶端（包含發送者）
-        //io.emit(eventName, message);
-        // 若要排除發送者，請改用以下寫法：
-        socket.broadcast.emit(eventName, message);
+        // 廣播訊息給所有客戶端（包含發送者）
+        io.emit(eventName, message);
     });
 
     // 監聽客戶端斷線事件
-    socket.on('disconnect', () => {
-        console.log('客戶端斷線，ID:', socket.id);
+    socket.on('disconnect', (reason) => {
+        console.log(`客戶端斷線，ID: ${socket.id}，原因: ${reason}`);
     });
 });
 
@@ -45,16 +43,16 @@ function getServerIPs() {
     }
     return addresses;
 }
-
+const port=80;
 // 設定伺服器監聽埠號（例如 3000），並在啟動時 log IP 位址
-server.listen(3000, () => {
-    console.log('Socket.IO 伺服器正在 3000 埠上運行');
+server.listen(port, () => {
+    console.log(`Socket.IO 伺服器正在 ${port} 埠上運行`);
 
     const ips = getServerIPs();
     if (ips.length > 0) {
         console.log('伺服器 IP 位址：');
         ips.forEach(ip => {
-            console.log(`http://${ip}:3000`);
+            console.log(`http://${ip}:${port}`);
         });
     } else {
         console.log('找不到外部網路介面的 IP 位址');
